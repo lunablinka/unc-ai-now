@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNC AI NOW — Your UNC AI Resource</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --unc-navy: #13294B;
+    --unc-blue: #4B9CD3;
+    --unc-light: #EEF4FA;
+    --unc-carolina: #7BAFD4;
+    --accent: #00A5C8;
+    --warn: #C84B00;
+    --green: #2D7D46;
+    --text: #1A1A2E;
+    --muted: #6B7A99;
+    --white: #FFFFFF;
+    --card-bg: #F7FAFD;
+    --border: #D6E4F0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--unc-light);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── PASSWORD GATE ── */
+  #password-gate {
+    position: fixed;
+    inset: 0;
+    background: var(--unc-navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    flex-direction: column;
+  }
+  #password-gate.hidden { display: none; }
+  .gate-box {
+    background: white;
+    border-radius: 16px;
+    padding: 3rem 2.5rem;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+  }
+  .gate-logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    color: var(--unc-navy);
+    margin-bottom: 0.3rem;
+  }
+  .gate-logo span { color: var(--unc-blue); }
+  .gate-sub {
+    font-size: 0.78rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+  .gate-label {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.6rem;
+    text-align: left;
+  }
+  .gate-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text);
+    margin-bottom: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .gate-input:focus { border-color: var(--unc-blue); }
+  .gate-input.error { border-color: #C84B00; }
+  .gate-btn {
+    width: 100%;
+    padding: 0.8rem;
+    background: var(--unc-navy);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .gate-btn:hover { background: #0d1f38; }
+  .gate-error {
+    color: #C84B00;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    display: none;
+  }
+  .gate-error.visible { display: block; }
+  .gate-note {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 1.5rem;
+    line-height: 1.5;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* ── NAV ── */
+  nav {
+    background: var(--unc-navy);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    flex-shrink: 0;
+  }
+  .nav-brand {
+    font-family: 'DM Serif Display', serif;
+    color: var(--white);
+    font-size: 1.2rem;
+    letter-spacing: 0.02em;
+  }
+  .nav-brand span { color: var(--unc-blue); }
+  .nav-badge {
+    background: var(--accent);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .nav-back {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    transition: all 0.2s;
+  }
+  .nav-back:hover { background: rgba(255,255,255,0.1); }
+
+  /* ── BREADCRUMB ── */
+  .breadcrumb {
+    background: var(--unc-navy);
+    padding: 0 2rem 12px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .breadcrumb span {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.75rem;
+  }
+  .breadcrumb span.active { color: var(--unc-blue); font-weight: 500; }
+  .breadcrumb .sep { color: rgba(255,255,255,0.25); }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, var(--unc-navy) 0%, #1a3a6b 60%, #1e4d8c 100%);
+    padding: 4rem 2rem 3rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -20%;
+    width: 140%;
+    height: 200%;
+    background: radial-gradient(ellipse at 60% 40%, rgba(75,156,211,0.12) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    color: var(--unc-blue);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    color: var(--white);
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+  .hero h1 span { color: var(--unc-blue); }
+  .hero-sub {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  .hero p {
+    color: rgba(255,255,255,0.8);
+    font-size: 1.05rem;
+    max-width: 560px;
+    margin: 0 auto;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .content {
+    flex: 1;
+    padding: 2.5rem 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .section-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.2rem;
+  }
+
+  /* ── ROLE CARDS ── */
+  .role-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+  .role-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1.6rem;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+  }
+  .role-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--unc-blue);
+    transform: scaleX(0);
+    transition: transform 0.22s ease;
+    transform-origin: left;
+  }
+  .role-card:hover { border-color: var(--unc-blue); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(19,41,75,0.1); }
+  .role-card:hover::after { transform: scaleX(1); }
+  .role-icon { font-size: 1.8rem; margin-bottom: 0.8rem; }
+  .role-card h3 { font-size: 1rem; font-weight: 600; color: var(--unc-navy); margin-bottom: 0.4rem; }
+  .role-card p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+  .role-arrow { position: absolute; top: 1.4rem; right: 1.4rem; color: var(--unc-blue); font-size: 1rem; opacity: 0; transition: opacity 0.2s; }
+  .role-card:hover .role-arrow { opacity: 1; }
+
+  /* ── GUIDANCE CARDS ── */
+  .guidance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .guidance-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.22s;
+  }
+  .guidance-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,165,200,0.1); }
+  .guidance-tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 0.8rem;
+  }
+  .tag-gov { background: #EEF4FA; color: var(--unc-navy); }
+  .tag-tools { background: #FFF3EE; color: var(--warn); }
+  .tag-scripts { background: #EEFAF2; color: var(--green); }
+  .guidance-card h3 { font-size: 0.95rem; font-weight: 600; color: var(--text); margin-bottom: 0.4rem; }
+  .guidance-card p { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+
+  /* ── FAQ ── */
+  .faq-item {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 0.8rem;
+    overflow: hidden;
+  }
+  .faq-q {
+    padding: 1.1rem 1.4rem;
+    font-weight: 500;
+    font-size: 0.92rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    transition: background 0.2s;
+  }
+  .faq-q:hover { background: var(--card-bg); }
+  .faq-q .chevron { color: var(--unc-blue); font-size: 0.8rem; transition: transform 0.2s; flex-shrink: 0; }
+  .faq-q.open .chevron { transform: rotate(180deg); }
+  .faq-a {
+    display: none;
+    padding: 0 1.4rem 1.1rem;
+    font-size: 0.87rem;
+    color: var(--muted);
+    line-height: 1.7;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+  }
+  .faq-a.open { display: block; }
+  .faq-a .verdict {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-top: 0.6rem;
+  }
+  .verdict-safe { background: #EEFAF2; color: var(--green); }
+  .verdict-caution { background: #FFF8EE; color: #9A6700; }
+  .verdict-no { background: #FFEEEE; color: #C00; }
+
+  /* ── TOOL TABLE ── */
+  .tool-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .tool-table th {
+    background: var(--unc-navy);
+    color: white;
+    padding: 0.8rem 1rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .tool-table td { padding: 0.9rem 1rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .tool-table tr:last-child td { border-bottom: none; }
+  .tool-table tr:nth-child(even) td { background: var(--card-bg); }
+  .pill {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .pill-approved { background: #EEFAF2; color: var(--green); }
+  .pill-caution { background: #FFF8EE; color: #9A6700; }
+  .pill-no { background: #FFEEEE; color: #C00; }
+
+  /* ── READY SCREEN ── */
+  .ready-hero {
+    background: linear-gradient(135deg, var(--green) 0%, #1a5c32 100%);
+    padding: 3rem 2rem;
+    text-align: center;
+    color: white;
+  }
+  .ready-check { font-size: 3rem; margin-bottom: 1rem; }
+  .ready-hero h2 { font-family: 'DM Serif Display', serif; font-size: 2rem; margin-bottom: 0.5rem; }
+  .ready-hero p { opacity: 0.85; font-size: 0.95rem; max-width: 420px; margin: 0 auto; line-height: 1.6; }
+  .checklist { list-style: none; margin: 1.5rem 0; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .check-icon { color: var(--green); font-size: 1rem; flex-shrink: 0; margin-top: 2px; }
+
+  /* ── PERSONA BADGE ── */
+  .persona-badge {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .persona-avatar {
+    width: 44px; height: 44px;
+    background: var(--unc-navy);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .persona-info h4 { font-size: 0.9rem; font-weight: 600; color: var(--unc-navy); }
+  .persona-info p { font-size: 0.78rem; color: var(--muted); }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.75rem 1.6rem;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .btn-primary { background: var(--unc-navy); color: white; }
+  .btn-primary:hover { background: #0d1f38; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(19,41,75,0.25); }
+  .btn-outline { background: transparent; color: var(--unc-navy); border: 1.5px solid var(--unc-navy); }
+  .btn-outline:hover { background: var(--unc-navy); color: white; }
+  .btn-accent { background: var(--accent); color: white; }
+  .btn-accent:hover { background: #0090b0; }
+
+  .btn-row { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-top: 1.5rem; }
+
+  /* ── ALERT BOX ── */
+  .alert {
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+  }
+  .alert-info { background: #EEF4FA; border-left: 3px solid var(--unc-blue); color: var(--unc-navy); }
+  .alert-warn { background: #FFF8EE; border-left: 3px solid #E8A020; color: #5c3d00; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--unc-navy);
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    padding: 1.2rem;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+  footer span { color: var(--unc-blue); }
+
+  /* ── PROTOTYPE BANNER ── */
+  .proto-banner {
+    background: #13294B;
+    border-bottom: 2px solid var(--accent);
+    color: rgba(255,255,255,0.7);
+    text-align: center;
+    padding: 6px 1rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .proto-banner span { color: var(--accent); font-weight: 600; }
+
+  h2.section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    color: var(--unc-navy);
+    margin-bottom: 0.4rem;
+  }
+  .section-desc { color: var(--muted); font-size: 0.88rem; margin-bottom: 1.8rem; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div id="password-gate">
+  <div class="gate-box">
+    <div class="gate-logo">UNC AI <span>NOW</span></div>
+    <div class="gate-sub">Your UNC AI Resource &nbsp;·&nbsp; Prototype</div>
+    <div class="gate-label">Enter access password to continue</div>
+    <input type="password" class="gate-input" id="gate-input" placeholder="Password" onkeydown="if(event.key==='Enter')checkPassword()"/>
+    <div class="gate-error" id="gate-error">Incorrect password. Please try again.</div>
+    <button class="gate-btn" onclick="checkPassword()">Access Prototype</button>
+    <div class="gate-note">
+      <strong style="color:#13294B; display:block; margin-bottom:0.4rem;">MEJO 725 &nbsp;&middot;&nbsp; Luna Vanaman</strong>
+      <strong style="color:#C84B00">Content Disclaimer:</strong> All FAQ answers, advising scripts, tool approval statuses, and policy guidance in this prototype are <strong>illustrative placeholder content only</strong>. They demonstrate the portal's structure and user experience &mdash; not actual UNC policy. In a real deployment, all content would be sourced from and verified by UNC ITS, the Office of Research, University Counsel, and other relevant institutional offices. Nothing here should be taken as official UNC guidance.
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 1: HOMEPAGE
+════════════════════════════════════════════ -->
+<div class="screen active" id="screen-home">
+  <div class="proto-banner"><span>Prototype</span> — UNC AI NOW MVP · MEJO 725 · Luna Vanaman &nbsp;|&nbsp; <span style="color:#ffcc80">Content is illustrative placeholder only — not official UNC policy</span></div>
+  <nav>
+    <div class="nav-brand">UNC AI <span>NOW</span></div>
+    <div class="nav-badge">Your UNC AI Resource</div>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-eyebrow">A UNC Office of Communications Initiative</div>
+    <h1>AI Guidance<br><span>When You Need It.</span></h1>
+    <div class="hero-sub">Your UNC AI Resource</div>
+    <p>UNC AI NOW gives UNC staff the role-specific AI guidance, plain-language governance answers, and honest tool comparisons they need to advise others with confidence. No guesswork. No piecing it together on their own.</p>
+  </div>
+
+  <div class="content">
+    <div class="alert alert-info">
+      💡 <span>Not sure where to start? Select your role below and we'll guide you to the answers most relevant to your work.</span>
+    </div>
+
+    <div class="section-label">I am a —</div>
+
+    <div class="role-grid">
+      <div class="role-card" onclick="goTo('screen-role-staff')">
+        <div class="role-icon">🔬</div>
+        <span class="role-arrow">→</span>
+        <h3>Research Support Staff</h3>
+        <p>Advising faculty and researchers on data safety, tool eligibility, and compliance.</p>
+      </div>
+      <div class="role-card" onclick="goTo('screen-role-it')">
+        <div class="role-icon">🖥️</div>
+        <span class="role-arrow">→</span>
+        <h3>Instructional Technology Staff</h3>
+        <p>Supporting faculty in adopting AI tools for teaching, learning, and course design.</p>
+      </div>
+      <div class="role-card" onclick="goTo('screen-role-admin')">
+        <div class="role-icon">🏛️</div>
+        <span class="role-arrow">→</span>
+        <h3>Administrative Staff</h3>
+        <p>Navigating AI tool use in operations, HR, communications, and university services.</p>
+      </div>
+      <div class="role-card" onclick="goTo('screen-role-faculty')">
+        <div class="role-icon">👩‍🏫</div>
+        <span class="role-arrow">→</span>
+        <h3>Faculty</h3>
+        <p>Understanding approved tools, academic integrity implications, and research use cases.</p>
+      </div>
+      <div class="role-card" onclick="goTo('screen-role-general')">
+        <div class="role-icon">👤</div>
+        <span class="role-arrow">→</span>
+        <h3>Staff (General)</h3>
+        <p>Getting plain-language answers on what AI tools you can use and how to use them safely.</p>
+      </div>
+      <div class="role-card" onclick="goTo('screen-role-students')">
+        <div class="role-icon">🎓</div>
+        <span class="role-arrow">→</span>
+        <h3>Students</h3>
+        <p>Understanding AI use policies, academic integrity, and approved tools for your coursework.</p>
+      </div>
+    </div>
+
+    <div class="alert alert-warn">
+      ⚠️ <span><strong>Not sure which role applies to you?</strong> Start with Research Support Staff — it covers the most common governance and tool questions asked across campus.</span>
+    </div>
+  </div>
+
+  <footer>UNC AI NOW · <span>Your UNC AI Resource</span> · A prototype by Luna Vanaman · MEJO 725</footer>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 2: ROLE — RESEARCH SUPPORT
+════════════════════════════════════════════ -->
+<div class="screen" id="screen-role-staff">
+  <div class="proto-banner"><span>Prototype</span> — UNC AI NOW MVP · MEJO 725 · Luna Vanaman &nbsp;|&nbsp; <span style="color:#ffcc80">Content is illustrative placeholder only — not official UNC policy</span></div>
+  <nav>
+    <div class="nav-brand">UNC AI <span>NOW</span></div>
+    <button class="nav-back" onclick="goTo('screen-home')">← Home</button>
+  </nav>
+  <div class="breadcrumb">
+    <span onclick="goTo('screen-home')" style="cursor:pointer">Home</span>
+    <span class="sep">›</span>
+    <span class="active">Research Support</span>
+  </div>
+
+  <div class="content">
+    <div class="persona-badge">
+      <div class="persona-avatar">MR</div>
+      <div class="persona-info">
+        <h4>You're viewing as: Marcus Rivera</h4>
+        <p>UNC-Chapel Hill Staff · Research Support · Instructional Technology · Administration</p>
+      </div>
+    </div>
+
+    <h2 class="section-title">Research Support Guidance</h2>
+    <p class="section-desc">You're often the first person researchers ask about AI tools and data safety. These resources are built to help you respond with confidence — not guesswork.</p>
+
+    <div class="section-label">What do you need help with?</div>
+    <div class="guidance-grid">
+      <div class="guidance-card" onclick="goTo('screen-governance')">
+        <span class="guidance-tag tag-gov">Data Governance</span>
+        <h3>What data can I enter into AI tools?</h3>
+        <p>Plain-language answers on data classification, FERPA, HIPAA, and what's safe to share.</p>
+      </div>
+      <div class="guidance-card" onclick="goTo('screen-tools')">
+        <span class="guidance-tag tag-tools">Tool Comparison</span>
+        <h3>Which AI tools are approved at UNC?</h3>
+        <p>Honest comparison of approved, restricted, and not-recommended tools — and why.</p>
+      </div>
+      <div class="guidance-card" onclick="goTo('screen-scripts')">
+        <span class="guidance-tag tag-scripts">Advising Scripts</span>
+        <h3>What do I say when someone asks me?</h3>
+        <p>Ready-to-use language for the most common questions you get from faculty and researchers.</p>
+      </div>
+    </div>
+
+    <div class="alert alert-info">
+      💡 <span>Don't see your question? Browse the <strong>full FAQ</strong> or contact the <strong>UNC AI NOW help desk</strong> for a direct answer from our team.</span>
+    </div>
+  </div>
+  <footer>UNC AI NOW · <span>Your UNC AI Resource</span> · A prototype by Luna Vanaman · MEJO 725</footer>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 2B: ROLE — INSTRUCTIONAL TECH
+════════════════════════════════════════════ -->
+<div class="screen" id="screen-role-it">
+  <div class="proto-banner"><span>Prototype</span> — UNC AI NOW MVP · MEJO 725 · Luna Vanaman &nbsp;|&nbsp; <span style="color:#ffcc80">Content is illustrative placeholder only — not official UNC policy</span></div>
+  <nav>
+    <div class="nav-brand">UNC AI <span>NOW</span></div>
+    <button class="nav-back" onclick="goTo('screen-home')">← Home</button>
+  </nav>
+  <div class="breadcrumb">
+    <span onclick="goTo('screen-home')" style="cursor:pointer">Home</span>
+    <span class="sep">›</span>
+    <span class="active">Instructional Technology</span>
+  </div>
+
+  <div class="content">
+    <h2 class="section-title">Instructional Technology Guidance</h2>
+    <p class="section-desc">Supporting faculty in adopting AI responsibly in teaching and course design requires clear institutional grounding. These resources are built for that role.</p>
+
+    <div class="section-label">What do you need help with?</div>
+    <div class="guidance-grid">
+      <div class="guidance-card" onclick="goTo('screen-governance')">
+        <span class="guidance-tag tag-gov">Data Governance</span>
+        <h3>Student data and AI tools</h3>
+        <p>What FERPA means for AI use in classrooms and how to advise faculty accordingly.</p>
+      </div>
+      <div class="guidance-card" onclick="goTo('screen-tools')">
+        <span class="guidance-tag tag-tools">Tool Comparison</span>
+        <h3>AI tools for teaching</h3>
+        <p>Which tools are approved for classroom use, with transparent rationale for each decision.</p>
+      </div>
+      <div class="guidance-card" onclick="goTo('screen-scripts')">
+        <span class="guidance-tag tag-scripts">Advising Scripts</span>
+        <h3>How to advise faculty</h3>
+        <p>Language and frameworks for supporting faculty who have questions about AI in their courses.</p>
+      </div>
+    </div>
+    <div class="alert alert-warn">
+      ⚠️ <span><strong>Academic integrity guidance</strong> for AI use in coursework is managed by the Dean of Students Office. UNC AI NOW provides tool and governance guidance only.</span>
+    </div>
+  </div>
+  <footer>UNC AI NOW · <span>Your UNC AI Resource</span> · A prototype by Luna Vanaman · MEJO 725</footer>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 2C: ROLE — ADMIN
+════════════════════════════════════════════ -->
+<div class="screen" id="screen-role-admin">
+  <div class="proto-banner"><span>Prototype</span> — UNC AI NOW MVP · MEJO 725 · Luna Vanaman &nbsp;|&nbsp; <span style="color:#ffcc80">Content is illustrative placeholder only — not official UNC policy</span></div>
+  <nav>
+    <div class="nav-brand">UNC AI <span>NOW</span></div>
+    <button class="nav-back" onclick="goTo('screen-home')">← Home</button>
+  </nav>
+  <div class="breadcrumb">
+    <span onclick="goTo('screen-home')" style="cursor:pointer">Home</span>
+    <span class="sep">›</span>
+    <span class="active">Administrative Staff</span>
+  </div>
+
+  <div class="content">
+    <h2 class="section-title">Administrative Staff Guidance</h2>
+    <p class="section-desc">Using AI in university operations raises real questions about data privacy, vendor risk, and institutional policy. Find clear answers here.</p>
+
+    <div class="guidance-grid">
+      <div class="guidance-card" onclick="goTo('screen-governance')">
+        <span class="guidance-tag tag-gov">Data Governance</span>
+        <h3>What's safe for operational use?</h3>
+        <p>Guidance on using AI tools for HR, communications, procurement, and administrative tasks.</p>
+      </div>
+      <div class="guidance-card" onclick="goTo('screen-tools')">
+        <span class="guidance-tag tag-tools">Tool Comparison</span>
+        <h3>Approved tools for admin work</h3>
+        <p>Which AI tools have passed UNC's security and contractual review for administrative use.</p>
+      </div>
+      <div class="guidance-card" onclick="goTo('screen-scripts')">
+        <span class="guidance-tag tag-scripts">Advising Scripts</span>
+        <h3>Responding to AI questions</h3>
+        <p>Ready-to-use language when colleagues ask what tools they can use in their daily work.</p>
+      </div>
+    </div>
+  </div>
+  <footer>UNC AI NOW · <span>Your UNC AI Resource</span> · A prototype by Luna Vanaman · MEJO 725</footer>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 3: DATA GOVERNANCE FAQ
+════════════════════════════════════════════ -->
+<div class="screen" id="screen-governance">
+  <div class="proto-banner"><span>Prototype</span> — UNC AI NOW MVP · MEJO 725 · Luna Vanaman &nbsp;|&nbsp; <span style="color:#ffcc80">Content is illustrative placeholder only — not official UNC policy</span></div>
+  <nav>
+    <div class="nav-brand">UNC AI <span>NOW</span></div>
+    <button class="nav-back" onclick="goTo('screen-role-staff')">← Back</button>
+  </nav>
+  <div class="breadcrumb">
+    <span onclick="goTo('screen-home')" style="cursor:pointer">Home</span>
+    <span class="sep">›</span>
+    <span onclick="goTo('screen-role-staff')" style="cursor:pointer">Research Support</span>
+    <span class="sep">›</span>
+    <span class="active">Data Governance</span>
+  </div>
+
+  <div class="content">
+    <h2 class="section-title">Data Governance FAQ</h2>
+    <p class="section-desc">Plain-language answers to the most common questions about what data is safe to use with AI tools at UNC. Updated in alignment with UNC ITS and the Office of Research.</p>
+
+    <div class="alert alert-warn">
+      ⚠️ <span><strong>When in doubt, don't enter it.</strong> If you're unsure whether data is safe to use in an AI tool, treat it as restricted until you get confirmation from UNC ITS.</span>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        Can I enter research data into ChatGPT or other public AI tools?
+        <span class="chevron">▼</span>
+      </div>
+      <div class="faq-a">
+        Generally, <strong>no</strong> — not without careful review. Public AI tools like ChatGPT may use your inputs to train future models. Research data — especially data covered by IRB protocols, grant agreements, or sponsor restrictions — should never be entered into public AI tools. Use only UNC-approved tools for any research-related data.
+        <br><br>
+        <span class="verdict verdict-no">✗ Not safe for research data</span>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        What counts as "sensitive" data at UNC?
+        <span class="chevron">▼</span>
+      </div>
+      <div class="faq-a">
+        UNC classifies data in three tiers: <strong>Public</strong> (safe to share freely), <strong>Sensitive</strong> (restricted access, includes student records, personnel data, unpublished research), and <strong>Restricted</strong> (HIPAA-covered, classified, or contractually protected). Only Public-tier data should be entered into non-approved AI tools.
+        <br><br>
+        <span class="verdict verdict-caution">⚠ Check classification before use</span>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        Is it safe to use AI tools for anonymized data?
+        <span class="chevron">▼</span>
+      </div>
+      <div class="faq-a">
+        It depends on how the data was anonymized and which tool you're using. True anonymization that meets IRB standards may make data eligible for use in some approved tools — but "de-identified" and "anonymized" are not always the same thing. Consult with your IRB coordinator before proceeding.
+        <br><br>
+        <span class="verdict verdict-caution">⚠ Consult IRB coordinator first</span>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        Can I use AI to help write grant proposals?
+        <span class="chevron">▼</span>
+      </div>
+      <div class="faq-a">
+        Yes — with important caveats. AI can help with structure, language, and editing. However, do not enter proprietary research methods, preliminary unpublished data, or sponsor-restricted information into any non-approved tool. Use UNC-approved tools only, and always disclose AI use per the funder's requirements.
+        <br><br>
+        <span class="verdict verdict-safe">✓ Approved with conditions</span>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        Does FERPA apply to AI tool use?
+        <span class="chevron">▼</span>
+      </div>
+      <div class="faq-a">
+        Yes. FERPA protects student educational records, which means any student-identifiable data — names, grades, enrollment status, advising notes — cannot be entered into AI tools that are not covered by a UNC data use agreement. This applies even to seemingly harmless uses like summarizing meeting notes that contain student information.
+        <br><br>
+        <span class="verdict verdict-no">✗ Student data requires approved tools only</span>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goTo('screen-tools')">Compare Approved Tools →</button>
+      <button class="btn btn-outline" onclick="goTo('screen-scripts')">Get Advising Scripts →</button>
+    </div>
+  </div>
+  <footer>UNC AI NOW · <span>Your UNC AI Resource</span> · A prototype by Luna Vanaman · MEJO 725</footer>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 4: TOOL COMPARISON
+════════════════════════════════════════════ -->
+<div class="screen" id="screen-tools">
+  <div class="proto-banner"><span>Prototype</span> — UNC AI NOW MVP · MEJO 725 · Luna Vanaman &nbsp;|&nbsp; <span style="color:#ffcc80">Content is illustrative placeholder only — not official UNC policy</span></div>
+  <nav>
+    <div class="nav-brand">UNC AI <span>NOW</span></div>
+    <button class="nav-back" onclick="goTo('screen-role-staff')">← Back</button>
+  </nav>
+  <div class="breadcrumb">
+    <span onclick="goTo('screen-home')" style="cursor:pointer">Home</span>
+    <span class="sep">›</span>
+    <span onclick="goTo('screen-role-staff')" style="cursor:pointer">Research Support</span>
+    <span class="sep">›</span>
+    <span class="active">Tool Comparison</span>
+  </div>
+
+  <div class="content">
+    <h2 class="section-title">AI Tool Comparison</h2>
+    <p class="section-desc">An honest, transparent comparison of AI tools relevant to UNC staff — including why some are approved, why some require caution, and why some are not recommended for institutional use. Updated quarterly by UNC ITS.</p>
+
+    <div class="alert alert-info">
+      💡 <span>Approval status reflects UNC's data use agreements and security review — not a judgment on tool quality. Staff often pay out of pocket for tools they trust more. This guide helps close that gap.</span>
+    </div>
+
+    <div style="overflow-x:auto; border-radius: 10px; border: 1.5px solid var(--border); margin-bottom: 1.5rem;">
+      <table class="tool-table">
+        <thead>
+          <tr>
+            <th>Tool</th>
+            <th>Status</th>
+            <th>Best For</th>
+            <th>Data Safety</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Microsoft Copilot</strong><br><small style="color:var(--muted)">via UNC M365</small></td>
+            <td><span class="pill pill-approved">✓ Approved</span></td>
+            <td>Writing, summarizing, email drafting, document work</td>
+            <td>Sensitive data OK within M365 environment</td>
+            <td>Preferred tool. Data stays within UNC's Microsoft tenant.</td>
+          </tr>
+          <tr>
+            <td><strong>ChatGPT (Free/Plus)</strong><br><small style="color:var(--muted)">OpenAI consumer</small></td>
+            <td><span class="pill pill-no">✗ Not Recommended</span></td>
+            <td>General writing, brainstorming</td>
+            <td>Public data only</td>
+            <td>May train on inputs. No UNC data agreement in place.</td>
+          </tr>
+          <tr>
+            <td><strong>ChatGPT Enterprise</strong><br><small style="color:var(--muted)">OpenAI enterprise</small></td>
+            <td><span class="pill pill-caution">⚠ Under Review</span></td>
+            <td>TBD</td>
+            <td>TBD — pending UNC agreement</td>
+            <td>UNC ITS currently evaluating. Check back Q3 2025.</td>
+          </tr>
+          <tr>
+            <td><strong>Claude (Anthropic)</strong><br><small style="color:var(--muted)">claude.ai</small></td>
+            <td><span class="pill pill-caution">⚠ Use with Caution</span></td>
+            <td>Research writing, analysis, long-form tasks</td>
+            <td>Public data only (consumer); Enterprise version preferred</td>
+            <td>No UNC agreement on consumer version. Strong tool — advocate for enterprise review.</td>
+          </tr>
+          <tr>
+            <td><strong>Google Gemini</strong><br><small style="color:var(--muted)">Google Workspace</small></td>
+            <td><span class="pill pill-caution">⚠ Use with Caution</span></td>
+            <td>Docs, Sheets, Slides integration</td>
+            <td>Check Google Workspace agreement</td>
+            <td>May be covered under existing UNC Google agreement — confirm with ITS.</td>
+          </tr>
+          <tr>
+            <td><strong>Grammarly</strong><br><small style="color:var(--muted)">Writing assistant</small></td>
+            <td><span class="pill pill-approved">✓ Approved</span></td>
+            <td>Writing, editing, grammar</td>
+            <td>Sensitive data OK with enterprise license</td>
+            <td>UNC has enterprise license. Use institutional account only.</td>
+          </tr>
+          <tr>
+            <td><strong>Otter.ai / Fireflies</strong><br><small style="color:var(--muted)">Meeting transcription</small></td>
+            <td><span class="pill pill-no">✗ Not Recommended</span></td>
+            <td>Meeting transcription</td>
+            <td>Public data only</td>
+            <td>No UNC agreement. Use MS Teams transcription instead.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goTo('screen-scripts')">Get Advising Scripts →</button>
+      <button class="btn btn-outline" onclick="goTo('screen-governance')">← Data Governance FAQ</button>
+    </div>
+  </div>
+  <footer>UNC AI NOW · <span>Your UNC AI Resource</span> · A prototype by Luna Vanaman · MEJO 725</footer>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 5: ADVISING SCRIPTS
+════════════════════════════════════════════ -->
+<div class="screen" id="screen-scripts">
+  <div class="proto-banner"><span>Prototype</span> — UNC AI NOW MVP · MEJO 725 · Luna Vanaman &nbsp;|&nbsp; <span style="color:#ffcc80">Content is illustrative placeholder only — not official UNC policy</span></div>
+  <nav>
+    <div class="nav-brand">UNC AI <span>NOW</span></div>
+    <button class="nav-back" onclick="goTo('screen-role-staff')">← Back</button>
+  </nav>
+  <div class="breadcrumb">
+    <span onclick="goTo('screen-home')" style="cursor:pointer">Home</span>
+    <span class="sep">›</span>
+    <span onclick="goTo('screen-role-staff')" style="cursor:pointer">Research Support</span>
+    <span class="sep">›</span>
+    <span class="active">Advising Scripts</span>
+  </div>
+
+  <div class="content">
+    <h2 class="section-title">Advising Scripts</h2>
+    <p class="section-desc">Ready-to-use language for the most common AI questions you get from faculty, researchers, and colleagues. These aren't corporate-speak — they're honest, clear, and grounded in UNC policy.</p>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        "Can I use ChatGPT for my research?"
+        <span class="chevron">▼</span>
+      </div>
+      <div class="faq-a">
+        <strong>Say this:</strong> "It depends on what you're using it for and what data you'd be entering. For brainstorming, structuring ideas, or working with public information — that's generally fine on the consumer version. But for anything involving your actual research data, IRB-covered subjects, grant-restricted materials, or unpublished findings, you'll want to use Microsoft Copilot through your UNC account instead. Want me to walk you through that?"
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        "What AI tools does UNC actually support?"
+        <span class="chevron">▼</span>
+      </div>
+      <div class="faq-a">
+        <strong>Say this:</strong> "Right now, the clearest institutional support is for Microsoft Copilot — it's included in our M365 licenses and has a data use agreement that protects UNC information. Grammarly Enterprise is also covered if you use your UNC account. For other tools like Claude or Gemini, ITS hasn't completed a full review yet, so we generally recommend using public data only until that changes. I can point you to UNC AI NOW for the current tool status page."
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        "Is it okay to use AI to write my grant proposal?"
+        <span class="chevron">▼</span>
+      </div>
+      <div class="faq-a">
+        <strong>Say this:</strong> "Yes, with a few things to keep in mind. AI is great for helping with structure, language, and editing — that part's fine. Just make sure you're not entering unpublished preliminary data, proprietary methods, or anything your funder restricts. And check the funder's requirements on AI disclosure — some are starting to require it. Use Copilot through your UNC account if you need to work with any sensitive content."
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        "I've been using [non-approved tool] for months. Is that a problem?"
+        <span class="chevron">▼</span>
+      </div>
+      <div class="faq-a">
+        <strong>Say this:</strong> "It depends on what data you've been entering. If it was all publicly available information or your own original writing with no restricted data, you're probably fine — but going forward, it's worth moving to an approved tool to be on the safe side. If you think you may have entered sensitive data, I'd recommend checking in with UNC ITS — not to get in trouble, but to assess whether any follow-up steps are needed. They're not going to penalize you for asking."
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        "My department head says to use AI but I don't know which one is safe."
+        <span class="chevron">▼</span>
+      </div>
+      <div class="faq-a">
+        <strong>Say this:</strong> "That's a really common situation right now and you're right to want clarity. The short answer: Microsoft Copilot is your safest bet — it's covered by UNC's data agreement and available through your existing M365 account. If your department head has a specific tool in mind, it's worth asking whether ITS has reviewed it. UNC AI NOW has a current comparison chart if that would help."
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goTo('screen-ready')">I'm Ready to Advise →</button>
+      <button class="btn btn-outline" onclick="goTo('screen-tools')">← Tool Comparison</button>
+    </div>
+  </div>
+  <footer>UNC AI NOW · <span>Your UNC AI Resource</span> · A prototype by Luna Vanaman · MEJO 725</footer>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 6: YOU'RE READY
+════════════════════════════════════════════ -->
+<div class="screen" id="screen-ready">
+  <div class="proto-banner"><span>Prototype</span> — UNC AI NOW MVP · MEJO 725 · Luna Vanaman &nbsp;|&nbsp; <span style="color:#ffcc80">Content is illustrative placeholder only — not official UNC policy</span></div>
+  <nav>
+    <div class="nav-brand">UNC AI <span>NOW</span></div>
+    <button class="nav-back" onclick="goTo('screen-scripts')">← Back</button>
+  </nav>
+
+  <div class="ready-hero">
+    <div class="ready-check">✓</div>
+    <h2>You're Ready to Advise.</h2>
+    <p>You now have the institutional grounding to respond to AI questions with confidence — not guesswork.</p>
+  </div>
+
+  <div class="content">
+    <h2 class="section-title">Your Confidence Checklist</h2>
+    <p class="section-desc">Review this before advising colleagues or faculty on AI tool use.</p>
+
+    <ul class="checklist">
+      <li>
+        <span class="check-icon">✓</span>
+        <span>I know the difference between <strong>public, sensitive, and restricted</strong> data at UNC and can explain it plainly.</span>
+      </li>
+      <li>
+        <span class="check-icon">✓</span>
+        <span>I can recommend <strong>Microsoft Copilot</strong> as the default approved tool with confidence and explain why it's safer than consumer alternatives.</span>
+      </li>
+      <li>
+        <span class="check-icon">✓</span>
+        <span>I understand that <strong>trust and confidence are different</strong> — staff may trust a tool personally but still need institutional clearance for professional use.</span>
+      </li>
+      <li>
+        <span class="check-icon">✓</span>
+        <span>I can acknowledge <strong>genuine uncertainty</strong> without feeling incompetent — unclear situations are unclear, not a reflection of my knowledge.</span>
+      </li>
+      <li>
+        <span class="check-icon">✓</span>
+        <span>I know where to <strong>escalate questions</strong> I can't answer: UNC ITS and the UNC AI NOW help desk.</span>
+      </li>
+      <li>
+        <span class="check-icon">✓</span>
+        <span>I have <strong>ready language</strong> for the five most common AI questions I receive from faculty, researchers, and colleagues.</span>
+      </li>
+    </ul>
+
+    <div class="alert alert-info">
+      💡 <span><strong>Bookmark this portal.</strong> Tool approval status and governance guidance will update as UNC's AI landscape evolves. Check UNC AI NOW before advising on any tool you haven't looked up recently.</span>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goTo('screen-home')">← Back to Home</button>
+      <button class="btn btn-accent" onclick="goTo('screen-role-staff')">Explore More Guidance</button>
+    </div>
+  </div>
+
+  <footer>UNC AI NOW · <span>Your UNC AI Resource</span> · A prototype by Luna Vanaman · MEJO 725</footer>
+</div>
+
+
+<script>
+  function goTo(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function toggleFaq(el) {
+    const answer = el.nextElementSibling;
+    const isOpen = answer.classList.contains('open');
+    // Close all
+    document.querySelectorAll('.faq-a').forEach(a => a.classList.remove('open'));
+    document.querySelectorAll('.faq-q').forEach(q => q.classList.remove('open'));
+    // Open this one if it wasn't open
+    if (!isOpen) {
+      answer.classList.add('open');
+      el.classList.add('open');
+    }
+  }
+
+  function checkPassword() {
+    const input = document.getElementById('gate-input');
+    const error = document.getElementById('gate-error');
+    const gate = document.getElementById('password-gate');
+    if (input.value === 'MADC725Prototype') {
+      gate.classList.add('hidden');
+      input.classList.remove('error');
+      error.classList.remove('visible');
+    } else {
+      input.classList.add('error');
+      error.classList.add('visible');
+      input.value = '';
+      input.focus();
+    }
+  }
+</script>
+
+
+<!-- ═══════════════════════════════════════════
+     SCREEN: FACULTY ROLE HUB
+════════════════════════════════════════════ -->
+<div class="screen" id="screen-role-faculty">
+  <div class="proto-banner"><span>Prototype</span> — UNC AI NOW MVP · MEJO 725 · Luna Vanaman &nbsp;|&nbsp; <span style="color:#ffcc80">Content is illustrative placeholder only — not official UNC policy</span></div>
+  <nav>
+    <div class="nav-brand">UNC AI <span>NOW</span></div>
+    <button class="nav-back" onclick="goTo('screen-home')">← Home</button>
+  </nav>
+  <div class="breadcrumb">
+    <span onclick="goTo('screen-home')" style="cursor:pointer">Home</span>
+    <span class="sep">›</span>
+    <span class="active">Faculty</span>
+  </div>
+  <div class="content">
+    <h2 class="section-title">Faculty AI Guidance</h2>
+    <p class="section-desc">As a faculty member you face AI questions from multiple directions — students, grant agencies, publishers, and colleagues. These resources help you navigate those expectations clearly and confidently.</p>
+    <div class="section-label">What do you need help with?</div>
+    <div class="guidance-grid">
+      <div class="guidance-card" onclick="goTo('screen-faculty-disclosure')">
+        <span class="guidance-tag tag-gov">Disclosure Requirements</span>
+        <h3>When do I have to disclose AI use?</h3>
+        <p>Grant agencies, journals, and publishers all have different requirements. Know what applies to your work.</p>
+      </div>
+      <div class="guidance-card" onclick="goTo('screen-faculty-integrity')">
+        <span class="guidance-tag tag-scripts">Academic Integrity</span>
+        <h3>AI and academic integrity in my courses</h3>
+        <p>How to set clear AI use policies in your syllabus and handle ambiguous situations with students.</p>
+      </div>
+      <div class="guidance-card" onclick="goTo('screen-tools')">
+        <span class="guidance-tag tag-tools">Tool Comparison</span>
+        <h3>Which AI tools are approved at UNC?</h3>
+        <p>Transparent comparison of approved, restricted, and not-recommended tools for faculty use.</p>
+      </div>
+    </div>
+  </div>
+  <footer>UNC AI NOW · <span>Your UNC AI Resource</span> · A prototype by Luna Vanaman · MEJO 725</footer>
+</div>
+
+<!-- FACULTY: DISCLOSURE -->
+<div class="screen" id="screen-faculty-disclosure">
+  <div class="proto-banner"><span>Prototype</span> — UNC AI NOW MVP · MEJO 725 · Luna Vanaman &nbsp;|&nbsp; <span style="color:#ffcc80">Content is illustrative placeholder only — not official UNC policy</span></div>
+  <nav>
+    <div class="nav-brand">UNC AI <span>NOW</span></div>
+    <button class="nav-back" onclick="goTo('screen-role-faculty')">← Back</button>
+  </nav>
+  <div class="breadcrumb">
+    <span onclick="goTo('screen-home')" style="cursor:pointer">Home</span>
+    <span class="sep">›</span>
+    <span onclick="goTo('screen-role-faculty')" style="cursor:pointer">Faculty</span>
+    <span class="sep">›</span>
+    <span class="active">Disclosure Requirements</span>
+  </div>
+  <div class="content">
+    <h2 class="section-title">AI Disclosure Requirements</h2>
+    <p class="section-desc">Requirements vary significantly by context. Use this guide to understand what's expected of you in research, publishing, and grant work.</p>
+    <div class="alert alert-warn">⚠️ <span><strong>When in doubt, disclose.</strong> Most funders and publishers prefer transparency over omission. Failing to disclose when required is a more serious issue than disclosing unnecessarily.</span></div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Do I need to disclose AI use in grant proposals?<span class="chevron">▼</span></div>
+      <div class="faq-a">It depends on the funder. NSF, NIH, and most federal agencies now have explicit AI disclosure policies — check the specific program announcement. Many require disclosure if AI was used in writing the proposal narrative. Using AI for editing or grammar checking is generally not required to disclose, but using it to generate scientific content or summaries typically is.<br><br><span class="verdict verdict-caution">⚠ Check funder requirements before submitting</span></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">What do journals require for AI disclosure in publications?<span class="chevron">▼</span></div>
+      <div class="faq-a">Most major publishers — including Elsevier, Springer, and Nature — now require authors to declare any use of AI tools in the methods or acknowledgments section. AI cannot be listed as an author. The key distinction most publishers make: AI used for language editing is generally acceptable with disclosure; AI used to generate or analyze data is more heavily scrutinized.<br><br><span class="verdict verdict-safe">✓ Disclose in acknowledgments or methods section</span></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Can I use AI to help write my IRB protocol?<span class="chevron">▼</span></div>
+      <div class="faq-a">Yes, with care. AI can assist with structure and language but should not be used to generate descriptions of research methodology or risk assessments that you haven't independently verified. The protocol must accurately reflect your actual research design — if AI introduces inaccuracies, that is your responsibility. Use only approved tools and avoid entering any participant-identifiable information.<br><br><span class="verdict verdict-caution">⚠ Verify all AI-generated content before submission</span></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Are there UNC-level policies on AI in research?<span class="chevron">▼</span></div>
+      <div class="faq-a">UNC's Office of Research is developing institution-wide guidance. At present, UNC follows federal agency requirements for sponsored research. Faculty are encouraged to consult with their department's research administrator and check the UNC Research website for the most current guidance, as this is a rapidly evolving area.<br><br><span class="verdict verdict-caution">⚠ Check UNC Office of Research for current guidance</span></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goTo('screen-faculty-integrity')">Academic Integrity Guidance →</button>
+      <button class="btn btn-outline" onclick="goTo('screen-tools')">View Tool Comparison →</button>
+    </div>
+  </div>
+  <footer>UNC AI NOW · <span>Your UNC AI Resource</span> · A prototype by Luna Vanaman · MEJO 725</footer>
+</div>
+
+<!-- FACULTY: ACADEMIC INTEGRITY -->
+<div class="screen" id="screen-faculty-integrity">
+  <div class="proto-banner"><span>Prototype</span> — UNC AI NOW MVP · MEJO 725 · Luna Vanaman &nbsp;|&nbsp; <span style="color:#ffcc80">Content is illustrative placeholder only — not official UNC policy</span></div>
+  <nav>
+    <div class="nav-brand">UNC AI <span>NOW</span></div>
+    <button class="nav-back" onclick="goTo('screen-role-faculty')">← Back</button>
+  </nav>
+  <div class="breadcrumb">
+    <span onclick="goTo('screen-home')" style="cursor:pointer">Home</span>
+    <span class="sep">›</span>
+    <span onclick="goTo('screen-role-faculty')" style="cursor:pointer">Faculty</span>
+    <span class="sep">›</span>
+    <span class="active">Academic Integrity</span>
+  </div>
+  <div class="content">
+    <h2 class="section-title">AI and Academic Integrity</h2>
+    <p class="section-desc">Setting clear expectations in your course is the most effective way to reduce ambiguity for students and protect yourself when questions arise.</p>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">What should my syllabus say about AI?<span class="chevron">▼</span></div>
+      <div class="faq-a">Be explicit — vague language creates ambiguity that students will fill in their own way. Your policy should state: whether AI tools are permitted, in what contexts (brainstorming vs. drafting vs. editing), which tools if any are permitted, and how students should disclose AI use. The UNC Center for Faculty Excellence has syllabus language templates available.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">A student submitted work I suspect was AI-generated. What do I do?<span class="chevron">▼</span></div>
+      <div class="faq-a">First, document your concerns and the specific evidence. AI detection tools are not reliable enough to use as sole evidence — do not cite a detection tool percentage as proof. Instead, have a conversation with the student about their process and ask them to explain their work. If you believe a violation occurred, refer to UNC's Honor Code process. Contact the Dean of Students Office for guidance before proceeding formally.<br><br><span class="verdict verdict-caution">⚠ Do not rely on AI detection tools as sole evidence</span></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Can I require students to use specific AI tools?<span class="chevron">▼</span></div>
+      <div class="faq-a">You can encourage or recommend specific tools, but requiring students to create accounts with third-party AI platforms raises FERPA considerations — student data may be collected by those platforms. If you want students to use an AI tool as part of coursework, consult with UNC ITS about which tools have appropriate data use agreements before making it a requirement.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">How do I design assignments that are more resilient to AI misuse?<span class="chevron">▼</span></div>
+      <div class="faq-a">Focus on process over product: require drafts, reflections, or in-class components that demonstrate student thinking. Assignments that ask for personal experience, local or recent context, or discipline-specific analysis that would require genuine expertise to evaluate are harder to complete meaningfully with AI alone. The UNC Center for Faculty Excellence offers workshops on AI-resilient assignment design.</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goTo('screen-tools')">View Approved Tools →</button>
+      <button class="btn btn-outline" onclick="goTo('screen-role-faculty')">← Faculty Hub</button>
+    </div>
+  </div>
+  <footer>UNC AI NOW · <span>Your UNC AI Resource</span> · A prototype by Luna Vanaman · MEJO 725</footer>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SCREEN: STUDENTS ROLE HUB
+════════════════════════════════════════════ -->
+<div class="screen" id="screen-role-students">
+  <div class="proto-banner"><span>Prototype</span> — UNC AI NOW MVP · MEJO 725 · Luna Vanaman &nbsp;|&nbsp; <span style="color:#ffcc80">Content is illustrative placeholder only — not official UNC policy</span></div>
+  <nav>
+    <div class="nav-brand">UNC AI <span>NOW</span></div>
+    <button class="nav-back" onclick="goTo('screen-home')">← Home</button>
+  </nav>
+  <div class="breadcrumb">
+    <span onclick="goTo('screen-home')" style="cursor:pointer">Home</span>
+    <span class="sep">›</span>
+    <span class="active">Students</span>
+  </div>
+  <div class="content">
+    <h2 class="section-title">Student AI Guidance</h2>
+    <p class="section-desc">AI tools are everywhere — but how you use them at UNC matters. Get clear, honest answers about what is allowed, what is not, and how to use AI in ways that actually help your learning.</p>
+    <div class="section-label">What do you need help with?</div>
+    <div class="guidance-grid">
+      <div class="guidance-card" onclick="goTo('screen-student-integrity')">
+        <span class="guidance-tag tag-gov">Academic Integrity</span>
+        <h3>What counts as misuse of AI?</h3>
+        <p>Understand UNC's Honor Code as it applies to AI and know where the line is before you cross it.</p>
+      </div>
+      <div class="guidance-card" onclick="goTo('screen-student-safe')">
+        <span class="guidance-tag tag-scripts">Safe AI Use</span>
+        <h3>How can I use AI without getting in trouble?</h3>
+        <p>Practical guidance on using AI to support your learning — not replace it.</p>
+      </div>
+      <div class="guidance-card" onclick="goTo('screen-tools')">
+        <span class="guidance-tag tag-tools">Tool Comparison</span>
+        <h3>Which tools are safe to use?</h3>
+        <p>An honest comparison of common AI tools and what you need to know about each one.</p>
+      </div>
+    </div>
+  </div>
+  <footer>UNC AI NOW · <span>Your UNC AI Resource</span> · A prototype by Luna Vanaman · MEJO 725</footer>
+</div>
+
+<!-- STUDENTS: ACADEMIC INTEGRITY -->
+<div class="screen" id="screen-student-integrity">
+  <div class="proto-banner"><span>Prototype</span> — UNC AI NOW MVP · MEJO 725 · Luna Vanaman &nbsp;|&nbsp; <span style="color:#ffcc80">Content is illustrative placeholder only — not official UNC policy</span></div>
+  <nav>
+    <div class="nav-brand">UNC AI <span>NOW</span></div>
+    <button class="nav-back" onclick="goTo('screen-role-students')">← Back</button>
+  </nav>
+  <div class="breadcrumb">
+    <span onclick="goTo('screen-home')" style="cursor:pointer">Home</span>
+    <span class="sep">›</span>
+    <span onclick="goTo('screen-role-students')" style="cursor:pointer">Students</span>
+    <span class="sep">›</span>
+    <span class="active">Academic Integrity</span>
+  </div>
+  <div class="content">
+    <h2 class="section-title">AI and Academic Integrity</h2>
+    <p class="section-desc">UNC's Honor Code applies to AI use. Understanding it protects you — and helps you use AI in ways that genuinely support your education.</p>
+    <div class="alert alert-warn">⚠️ <span><strong>Your professor's policy overrides everything else.</strong> Always check your syllabus first. If it does not address AI, ask your professor before using any AI tools for that course.</span></div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Is using AI on assignments cheating?<span class="chevron">▼</span></div>
+      <div class="faq-a">It depends entirely on your professor's policy and how you use it. Submitting AI-generated text as your own original work without disclosure is a violation of the Honor Code in most contexts. Using AI to brainstorm, get feedback on your draft, or check grammar — and disclosing that use — may be permitted. The key is transparency and following your specific course policy.<br><br><span class="verdict verdict-caution">⚠ Always check your syllabus and ask your professor</span></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">What happens if I'm reported for AI misuse?<span class="chevron">▼</span></div>
+      <div class="faq-a">If a faculty member believes you violated the Honor Code, they will refer the matter to the Honor System. You will have the opportunity to respond. Outcomes range from no finding to grade penalties or suspension depending on severity and history. The most important thing: if you are ever unsure whether your AI use is permitted, ask your professor before submitting — not after.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Can professors tell if I used AI?<span class="chevron">▼</span></div>
+      <div class="faq-a">AI detection tools exist but are unreliable — they produce both false positives and false negatives. Professors cannot definitively prove AI use through detection tools alone. However, faculty know your writing. Significant shifts in style, vocabulary, or argument quality from previous work are often more telling than any detection tool. The safest approach is honest, disclosed use within your course policy.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">How should I cite or disclose AI use?<span class="chevron">▼</span></div>
+      <div class="faq-a">When disclosure is required or appropriate, include a brief note — in a footnote, acknowledgments section, or author's note — that describes what tool you used and how. For example: "ChatGPT was used to generate an initial outline for this paper, which was then substantially revised by the author." Be specific about the nature of the use, not just that AI was involved.</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goTo('screen-student-safe')">Safe AI Use Guide →</button>
+      <button class="btn btn-outline" onclick="goTo('screen-tools')">View Tool Comparison →</button>
+    </div>
+  </div>
+  <footer>UNC AI NOW · <span>Your UNC AI Resource</span> · A prototype by Luna Vanaman · MEJO 725</footer>
+</div>
+
+<!-- STUDENTS: SAFE USE -->
+<div class="screen" id="screen-student-safe">
+  <div class="proto-banner"><span>Prototype</span> — UNC AI NOW MVP · MEJO 725 · Luna Vanaman &nbsp;|&nbsp; <span style="color:#ffcc80">Content is illustrative placeholder only — not official UNC policy</span></div>
+  <nav>
+    <div class="nav-brand">UNC AI <span>NOW</span></div>
+    <button class="nav-back" onclick="goTo('screen-role-students')">← Back</button>
+  </nav>
+  <div class="breadcrumb">
+    <span onclick="goTo('screen-home')" style="cursor:pointer">Home</span>
+    <span class="sep">›</span>
+    <span onclick="goTo('screen-role-students')" style="cursor:pointer">Students</span>
+    <span class="sep">›</span>
+    <span class="active">Safe AI Use</span>
+  </div>
+  <div class="content">
+    <h2 class="section-title">Using AI Safely and Effectively</h2>
+    <p class="section-desc">AI is most useful when it helps you think better, not when it thinks for you. Here is how to get genuine value from AI tools without compromising your integrity or your learning.</p>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">What are good ways to use AI that won't get me in trouble?<span class="chevron">▼</span></div>
+      <div class="faq-a">Generally safe uses include: brainstorming and idea generation before you write, asking AI to explain concepts you do not understand, getting feedback on a draft you have already written, checking grammar and clarity, and researching background context. The common thread: you are doing the thinking, and AI is supporting it. When AI does the primary intellectual work and you submit it as yours, that is where problems arise.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Should I enter personal or academic information into AI tools?<span class="chevron">▼</span></div>
+      <div class="faq-a">Be careful. Do not enter other students' information, confidential course materials, or sensitive personal data into consumer AI tools. Most consumer AI platforms store your inputs and may use them in training. For anything involving sensitive academic work, use UNC-approved tools or keep your prompts general and anonymized.<br><br><span class="verdict verdict-caution">⚠ Never enter other people's information into AI tools</span></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">How do I know if AI output is accurate?<span class="chevron">▼</span></div>
+      <div class="faq-a">You often cannot tell just by reading it — AI generates confident-sounding text regardless of accuracy. Always verify facts, citations, and statistics from AI output against authoritative sources. AI tools frequently hallucinate — inventing citations, misrepresenting studies, or stating false information with complete confidence. Treat AI output as a starting point, not a source.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">What is the best AI tool for students at UNC?<span class="chevron">▼</span></div>
+      <div class="faq-a">Microsoft Copilot is available through your UNC Microsoft 365 account and is the safest option for any work involving UNC systems or data. For general personal use, many students use ChatGPT or Claude — just be aware these are consumer tools with no UNC data agreement. Never use them for work involving other students' information or sensitive academic content.<br><br><span class="verdict verdict-safe">✓ Use Copilot via your UNC M365 account for safest option</span></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goTo('screen-tools')">Compare AI Tools →</button>
+      <button class="btn btn-outline" onclick="goTo('screen-student-integrity')">← Academic Integrity</button>
+    </div>
+  </div>
+  <footer>UNC AI NOW · <span>Your UNC AI Resource</span> · A prototype by Luna Vanaman · MEJO 725</footer>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SCREEN: STAFF GENERAL ROLE HUB
+════════════════════════════════════════════ -->
+<div class="screen" id="screen-role-general">
+  <div class="proto-banner"><span>Prototype</span> — UNC AI NOW MVP · MEJO 725 · Luna Vanaman &nbsp;|&nbsp; <span style="color:#ffcc80">Content is illustrative placeholder only — not official UNC policy</span></div>
+  <nav>
+    <div class="nav-brand">UNC AI <span>NOW</span></div>
+    <button class="nav-back" onclick="goTo('screen-home')">← Home</button>
+  </nav>
+  <div class="breadcrumb">
+    <span onclick="goTo('screen-home')" style="cursor:pointer">Home</span>
+    <span class="sep">›</span>
+    <span class="active">General Staff</span>
+  </div>
+  <div class="content">
+    <h2 class="section-title">General Staff AI Guidance</h2>
+    <p class="section-desc">You do not need to be an AI expert to use these tools responsibly. This section gives you straightforward answers to the questions most UNC staff encounter in their everyday work.</p>
+    <div class="section-label">What do you need help with?</div>
+    <div class="guidance-grid">
+      <div class="guidance-card" onclick="goTo('screen-general-everyday')">
+        <span class="guidance-tag tag-gov">Everyday AI Use</span>
+        <h3>What can I use AI for in my daily work?</h3>
+        <p>Plain-language guidance on what is safe, what to avoid, and how to get started with approved tools.</p>
+      </div>
+      <div class="guidance-card" onclick="goTo('screen-general-escalate')">
+        <span class="guidance-tag tag-scripts">Who to Ask</span>
+        <h3>Who do I contact when I am not sure?</h3>
+        <p>Know exactly who to escalate to when AI questions go beyond what you can answer alone.</p>
+      </div>
+      <div class="guidance-card" onclick="goTo('screen-tools')">
+        <span class="guidance-tag tag-tools">Tool Comparison</span>
+        <h3>Which AI tools are approved at UNC?</h3>
+        <p>Honest comparison of tools — what is safe, what requires caution, and what to avoid.</p>
+      </div>
+    </div>
+  </div>
+  <footer>UNC AI NOW · <span>Your UNC AI Resource</span> · A prototype by Luna Vanaman · MEJO 725</footer>
+</div>
+
+<!-- GENERAL STAFF: EVERYDAY USE -->
+<div class="screen" id="screen-general-everyday">
+  <div class="proto-banner"><span>Prototype</span> — UNC AI NOW MVP · MEJO 725 · Luna Vanaman &nbsp;|&nbsp; <span style="color:#ffcc80">Content is illustrative placeholder only — not official UNC policy</span></div>
+  <nav>
+    <div class="nav-brand">UNC AI <span>NOW</span></div>
+    <button class="nav-back" onclick="goTo('screen-role-general')">← Back</button>
+  </nav>
+  <div class="breadcrumb">
+    <span onclick="goTo('screen-home')" style="cursor:pointer">Home</span>
+    <span class="sep">›</span>
+    <span onclick="goTo('screen-role-general')" style="cursor:pointer">General Staff</span>
+    <span class="sep">›</span>
+    <span class="active">Everyday AI Use</span>
+  </div>
+  <div class="content">
+    <h2 class="section-title">Everyday AI Use for UNC Staff</h2>
+    <p class="section-desc">Most day-to-day AI questions come down to one thing: what kind of information are you working with? Use this guide to make confident decisions.</p>
+    <div class="alert alert-info">💡 <span><strong>The simplest rule:</strong> If you would not email this information to someone outside UNC, do not enter it into a consumer AI tool.</span></div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">What tasks is AI actually useful for in my work?<span class="chevron">▼</span></div>
+      <div class="faq-a">AI tools are genuinely useful for drafting and editing emails or documents, summarizing long documents or meeting notes, brainstorming ideas and outlines, creating first drafts you then revise, formatting and organizing information, and generating talking points. These tasks do not require sensitive data and are well within the capabilities of approved tools like Microsoft Copilot.<br><br><span class="verdict verdict-safe">✓ Great starting point for most staff</span></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">What should I never put into an AI tool?<span class="chevron">▼</span></div>
+      <div class="faq-a">Never enter: student records or grades, employee personnel information, health or medical data, social security numbers or financial account information, unpublished research data, information covered by a non-disclosure agreement, or any information marked confidential. If you are unsure whether information is sensitive, treat it as sensitive until you confirm otherwise with UNC ITS.<br><br><span class="verdict verdict-no">✗ Never enter restricted or personally identifiable information</span></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">My supervisor told me to use an AI tool I have not heard of. What should I do?<span class="chevron">▼</span></div>
+      <div class="faq-a">It is reasonable to ask whether the tool has been reviewed by UNC ITS before entering any work-related information. You can say: "I want to make sure we're using this in compliance with UNC's data policies — has ITS reviewed it?" That is not pushback, it is responsible practice. You can also check the UNC AI NOW tool comparison page or contact ITS directly to ask about a specific tool's status.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">How do I get started with Microsoft Copilot?<span class="chevron">▼</span></div>
+      <div class="faq-a">Copilot is available through your existing UNC Microsoft 365 account — you may already have access. Open any Microsoft 365 app (Word, Outlook, Teams) and look for the Copilot icon. If you do not see it, contact UNC ITS to confirm your account has Copilot enabled. No separate sign-up is required if your account is licensed.<br><br><span class="verdict verdict-safe">✓ Start here — it is your safest and most accessible option</span></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goTo('screen-general-escalate')">Who to Ask When Unsure →</button>
+      <button class="btn btn-outline" onclick="goTo('screen-tools')">View Tool Comparison →</button>
+    </div>
+  </div>
+  <footer>UNC AI NOW · <span>Your UNC AI Resource</span> · A prototype by Luna Vanaman · MEJO 725</footer>
+</div>
+
+<!-- GENERAL STAFF: WHO TO ASK -->
+<div class="screen" id="screen-general-escalate">
+  <div class="proto-banner"><span>Prototype</span> — UNC AI NOW MVP · MEJO 725 · Luna Vanaman &nbsp;|&nbsp; <span style="color:#ffcc80">Content is illustrative placeholder only — not official UNC policy</span></div>
+  <nav>
+    <div class="nav-brand">UNC AI <span>NOW</span></div>
+    <button class="nav-back" onclick="goTo('screen-role-general')">← Back</button>
+  </nav>
+  <div class="breadcrumb">
+    <span onclick="goTo('screen-home')" style="cursor:pointer">Home</span>
+    <span class="sep">›</span>
+    <span onclick="goTo('screen-role-general')" style="cursor:pointer">General Staff</span>
+    <span class="sep">›</span>
+    <span class="active">Who to Ask</span>
+  </div>
+  <div class="content">
+    <h2 class="section-title">Who to Contact When You Are Not Sure</h2>
+    <p class="section-desc">Knowing when to escalate is a skill — and knowing who to contact makes it easy. Use this guide to get to the right person quickly.</p>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">My question is about data safety or tool approval<span class="chevron">▼</span></div>
+      <div class="faq-a"><strong>Contact: UNC ITS (Information Technology Services)</strong><br><br>ITS handles tool security reviews, data classification questions, and institutional software agreements. They are the authoritative source on whether a specific AI tool has been reviewed for UNC use. Visit help.unc.edu or call the ITS Help Desk.<br><br><span class="verdict verdict-safe">✓ ITS Help Desk: help.unc.edu</span></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">My question is about research data or IRB considerations<span class="chevron">▼</span></div>
+      <div class="faq-a"><strong>Contact: UNC Office of Research</strong><br><br>For questions about AI use with research data, IRB protocols, grant compliance, or sponsor requirements, the Office of Research is your resource. They can connect you with a research compliance specialist for your specific situation.<br><br><span class="verdict verdict-safe">✓ UNC Office of Research: research.unc.edu</span></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">My question is about student data or FERPA<span class="chevron">▼</span></div>
+      <div class="faq-a"><strong>Contact: University Registrar</strong><br><br>FERPA questions related to student records and AI tool use should go to the University Registrar's office. They can advise on what constitutes protected student information and how it may or may not be used in AI contexts.<br><br><span class="verdict verdict-safe">✓ University Registrar: registrar.unc.edu</span></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">I am not sure which office handles my question<span class="chevron">▼</span></div>
+      <div class="faq-a"><strong>Start with UNC AI NOW or ITS</strong><br><br>If you are not sure where to begin, the UNC AI NOW help desk (coming soon) will route your question to the right office. In the meantime, ITS is the best first contact for most AI-related questions — they can refer you if needed. You will not be penalized for asking.<br><br><span class="verdict verdict-safe">✓ When in doubt, start with ITS</span></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goTo('screen-tools')">View Approved Tools →</button>
+      <button class="btn btn-outline" onclick="goTo('screen-general-everyday')">← Everyday AI Use</button>
+    </div>
+  </div>
+  <footer>UNC AI NOW · <span>Your UNC AI Resource</span> · A prototype by Luna Vanaman · MEJO 725</footer>
+</div>
+
+</body>
+</html>
